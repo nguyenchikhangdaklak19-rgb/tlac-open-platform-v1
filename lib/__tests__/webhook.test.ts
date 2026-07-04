@@ -65,6 +65,48 @@ describe("validateSupportInput", () => {
     });
     expect(result.ok).toBe(false);
   });
+
+  it("trims surrounding whitespace on valid fields before accepting them", () => {
+    const result = validateSupportInput({
+      capabilityName: "  Đặt vé máy bay  ",
+      errorType: "  Khác  ",
+      description: "  Có lỗi  ",
+      contactEmail: "  dev@vidu.com  ",
+    });
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.value.capabilityName).toBe("Đặt vé máy bay");
+      expect(result.value.contactEmail).toBe("dev@vidu.com");
+      expect(result.value.description).toBe("Có lỗi");
+    }
+  });
+
+  it("reports only the fields that are actually missing", () => {
+    const result = validateSupportInput({
+      capabilityName: "Đặt vé máy bay",
+      errorType: "Khác",
+      description: "",
+      contactEmail: "dev@vidu.com",
+    });
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.errors.description).toBeTruthy();
+      expect(result.errors.capabilityName).toBeUndefined();
+      expect(result.errors.errorType).toBeUndefined();
+      expect(result.errors.contactEmail).toBeUndefined();
+    }
+  });
+
+  it.each([
+    "no-at-sign",
+    "missing-tld@domain",
+    "spaces in@email.com",
+    "@no-local.com",
+    "trailing@",
+  ])("rejects malformed email %j (server-side, unbypassable)", (email) => {
+    const result = validateSupportInput({ ...samplePayload, contactEmail: email });
+    expect(result.ok).toBe(false);
+  });
 });
 
 describe("formatSlackPayload", () => {
@@ -77,6 +119,20 @@ describe("formatSlackPayload", () => {
     expect(text).toMatch(/Thời gian:/);
     // Roughly ISO-8601 timestamp somewhere in the text.
     expect(text).toMatch(/\d{4}-\d{2}-\d{2}T/);
+  });
+
+  it("passes a newline-laden description straight through into the Slack text (injection awareness)", () => {
+    // Documents current behavior: the description is not sanitized, so newlines
+    // survive into the plain-text Slack message. This is acceptable for an
+    // internal-only Slack notification but is captured here so any future
+    // change to sanitize/escape it is a conscious decision.
+    const { text } = formatSlackPayload({
+      ...samplePayload,
+      description: "line one\n- Email liên hệ: attacker@evil.com",
+    });
+    expect(text).toContain("attacker@evil.com");
+    // The genuine contact email still appears exactly once as a labeled field.
+    expect(text).toContain(`- Email liên hệ: ${samplePayload.contactEmail}`);
   });
 });
 
