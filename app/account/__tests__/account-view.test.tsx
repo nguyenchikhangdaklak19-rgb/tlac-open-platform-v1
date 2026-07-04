@@ -97,4 +97,52 @@ describe("AccountView", () => {
     expect(maliciousHtml).not.toContain('<img src=x onerror="alert(1)">');
     expect(maliciousHtml).toContain("&lt;img");
   });
+
+  it("escapes HTML in the config snippet too — no XSS via configSnippet DB content", () => {
+    const maliciousHtml = renderToStaticMarkup(
+      <AccountView
+        email="dev@vidu.com"
+        capabilities={[
+          {
+            slug: "xss-config",
+            name: "Ổn",
+            vertical: "TRAVEL",
+            configSnippet: '</pre><script>alert(1)</script>',
+          },
+        ]}
+      />,
+    );
+    expect(maliciousHtml).not.toContain("<script>alert(1)</script>");
+    expect(maliciousHtml).toContain("&lt;script&gt;alert(1)&lt;/script&gt;");
+  });
+
+  it("escapes HTML in the session email — no XSS via a malicious email", () => {
+    const maliciousHtml = renderToStaticMarkup(
+      <AccountView
+        email={'evil<script>alert(1)</script>@vidu.com'}
+        capabilities={fakeCapabilities}
+      />,
+    );
+    expect(maliciousHtml).not.toContain("<script>alert(1)</script>");
+    expect(maliciousHtml).toContain("&lt;script&gt;");
+  });
+
+  it("keeps the config unlocked (copy control, no login CTA) even for empty capabilities", () => {
+    const emptyHtml = renderToStaticMarkup(
+      <AccountView email="dev@vidu.com" capabilities={[]} />,
+    );
+    // No config blocks to unlock, but the account surface must never show the
+    // locked-state login CTA to an already-authenticated user.
+    expect(emptyHtml).not.toContain("Đăng nhập để lấy cấu hình");
+    // Still a single connection summary section + support + logout.
+    expect(emptyHtml).toContain("Thông tin kết nối");
+    expect(emptyHtml).toContain('href="/support"');
+    expect(emptyHtml).toContain("Đăng xuất");
+  });
+
+  it("renders each capability's exact configSnippet verbatim (the copy payload)", () => {
+    for (const capability of fakeCapabilities) {
+      expect(html).toContain(capability.configSnippet);
+    }
+  });
 });
