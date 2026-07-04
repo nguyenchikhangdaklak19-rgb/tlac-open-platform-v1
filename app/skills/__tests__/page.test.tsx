@@ -1,6 +1,13 @@
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import SkillsPage from "@/app/skills/page";
+
+const pageSource = readFileSync(
+  fileURLToPath(new URL("../page.tsx", import.meta.url)),
+  "utf8",
+);
 
 describe("SkillsPage", () => {
   const html = renderToStaticMarkup(<SkillsPage />);
@@ -25,5 +32,21 @@ describe("SkillsPage", () => {
 
   it("links to /docs for the connection quickstart", () => {
     expect(html).toContain('href="/docs"');
+  });
+
+  it("never fetches data — the placeholder must stay 100% static", () => {
+    // Source-level guard: the invariant is that this page cannot leak an
+    // unpublished admin-created Skill because it has no data source at all.
+    // Markup checks can miss this if a fetch resolves to nothing, so assert
+    // against the source itself.
+    expect(pageSource).not.toMatch(/prisma/i);
+    expect(pageSource).not.toMatch(/\bfetch\s*\(/);
+    expect(pageSource).not.toMatch(/\basync\b/);
+    expect(pageSource).not.toMatch(/\bawait\b/);
+    expect(pageSource).not.toMatch(/from\s+["']@\/lib/);
+  });
+
+  it("renders no fabricated endpoint URL", () => {
+    expect(html).not.toMatch(/https?:\/\//);
   });
 });
