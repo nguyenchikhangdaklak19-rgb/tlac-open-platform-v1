@@ -1,0 +1,87 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "./generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+enum CapabilityType {
+  MCP
+  SKILL
+}
+
+enum Vertical {
+  TRAVEL
+  PHIM
+  FNB
+  PROMOTION
+}
+
+enum CapabilityStatus {
+  VISIBLE
+  HIDDEN
+}
+
+/// A capability card shown in the public catalog (MCP tool or Skill).
+/// All display content (name/desc/schema/examples/config) is admin-managed
+/// via CMS in a later task — this model only defines the shape. Per the
+/// anti-fabrication rule in spec/tlac-open-platform-v1.md, no real tool
+/// schemas/endpoints are seeded here.
+model Capability {
+  id            String           @id @default(cuid())
+  type          CapabilityType
+  vertical      Vertical
+  name          String
+  slug          String           @unique
+  shortDesc     String
+  /// Long-form description / docs, markdown.
+  longDesc      String
+  /// Display-only tool list + input/output schema, stored as a JSON string.
+  toolSchema    String
+  /// Example calls, stored as JSON or markdown string.
+  examples      String
+  /// Connection config snippet shown to logged-in users, plain text.
+  configSnippet String
+  status        CapabilityStatus @default(VISIBLE)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  @@index([vertical])
+  @@index([status])
+}
+
+/// A registered dev/agent-builder account (BYOA v1). isAdmin is derived from
+/// ADMIN_EMAILS at registration/login time by the auth task — this model
+/// only keeps the column.
+model User {
+  id            String   @id @default(cuid())
+  /// Always stored lowercase; uniqueness enforced at this normalized form.
+  email         String   @unique
+  emailVerified Boolean  @default(false)
+  isAdmin       Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+/// One-time-password codes used for email verification / login (auth
+/// mechanism decided by the auth task). Never store the raw code, only a hash.
+/// Intentionally not FK-linked to User: an OTP can be requested for an email
+/// before any User row exists (registration flow), so email is a plain,
+/// indexed column rather than a relation.
+model OtpCode {
+  id         String    @id @default(cuid())
+  email      String
+  codeHash   String
+  expiresAt  DateTime
+  consumedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([email])
+}
