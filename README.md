@@ -70,6 +70,3 @@ Repo vận hành theo mô hình **autonomous engineering team** (xem [`CLAUDE.md
 
 Runtime config MCP (endpoint/params/auth) · nội dung Skill thật · API key/OAuth · quota/rate-limit/billing tầng website · ticket inbox · đa ngôn ngữ · attribution dashboard.
 
-## ⚠️ Lưu ý trước khi GA
-
-v1 là *self-serve + chưa có API key + endpoint giao dịch thật* → ai đăng ký cũng lấy được config gọi tool thật (order/booking = tiền thật). **Chỉ phù hợp test nội bộ / beta hẹp** cho tới khi: (1) tầng MCP server có rate-limit/chống lạm dụng, (2) BU + Tech Lead align xong payment & attribution khi agent ngoài tạo booking. Chi tiết ở mục "Ghi chú / ràng buộc" trong spec.
