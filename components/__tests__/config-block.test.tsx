@@ -20,4 +20,16 @@ describe("ConfigBlock", () => {
     expect(html).not.toContain("Đăng nhập để lấy cấu hình");
     expect(html).toContain("Sao chép");
   });
+
+  it("escapes HTML in the admin-authored snippet — no XSS via DB content", () => {
+    const html = renderToStaticMarkup(
+      <ConfigBlock
+        configSnippet={'<img src=x onerror="alert(1)">'}
+        isLoggedIn={true}
+      />,
+    );
+    // React must render the snippet as inert text, never as a live tag.
+    expect(html).not.toContain('<img src=x onerror="alert(1)">');
+    expect(html).toContain("&lt;img");
+  });
 });

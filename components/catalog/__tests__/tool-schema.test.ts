@@ -55,4 +55,24 @@ describe("parseToolSchema", () => {
   it("treats an array of non-object entries as invalid", () => {
     expect(parseToolSchema(JSON.stringify(["a", "b"])).kind).toBe("invalid");
   });
+
+  it("treats valid JSON that is not an array (e.g. an object) as empty", () => {
+    // Admin might paste `{ "tools": [...] }` instead of a bare array — must
+    // not crash and must fall back to the "no schema yet" empty state.
+    expect(parseToolSchema(JSON.stringify({ tools: [] }))).toEqual({
+      kind: "empty",
+    });
+    expect(parseToolSchema("42")).toEqual({ kind: "empty" });
+    expect(parseToolSchema("null")).toEqual({ kind: "empty" });
+  });
+
+  it("keeps only the object entries when the array mixes objects and junk", () => {
+    const result = parseToolSchema(
+      JSON.stringify([{ name: "search_flights" }, "junk", 7, null]),
+    );
+    expect(result.kind).toBe("tools");
+    if (result.kind !== "tools") throw new Error("expected kind 'tools'");
+    expect(result.tools).toHaveLength(1);
+    expect(toolLabel(result.tools[0], 0)).toBe("search_flights");
+  });
 });
