@@ -5,6 +5,7 @@ import { test, expect } from "@playwright/test";
 import {
   assertHasVisibleText,
   assertNoHorizontalOverflow,
+  assertNoPptxMagenta,
   assertNoUppercaseButtonsOrLinks,
 } from "./helpers/design";
 import { gotoReady } from "./helpers/nav";
@@ -36,6 +37,14 @@ test.describe("G. Responsive & Design system", () => {
       });
     });
   }
+
+  test("PPTX magenta #A1185C never appears on landing or a detail page", async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await gotoReady(page, "/");
+    await assertNoPptxMagenta(page);
+    await gotoReady(page, "/mcp/dat-ve-may-bay");
+    await assertNoPptxMagenta(page);
+  });
 
   test("MoMo pink #eb2f96 appears on the landing page's primary CTA", async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
