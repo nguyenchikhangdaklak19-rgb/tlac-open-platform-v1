@@ -81,6 +81,23 @@ describe("createCapability", () => {
     expect(all).toHaveLength(1);
   });
 
+  it("ignores unexpected/mass-assigned fields (only whitelisted columns persist)", async () => {
+    const result = await createCapability(db.prisma, {
+      ...VALID_INPUT,
+      id: "HACKED-ID",
+      createdAt: new Date("2000-01-01T00:00:00Z"),
+      isAdmin: true,
+      evil: "nope",
+    } as Record<string, unknown>);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    // A real cuid is generated; the attacker-supplied id/createdAt are dropped.
+    expect(result.data.id).not.toBe("HACKED-ID");
+    expect(result.data.createdAt.getFullYear()).toBeGreaterThan(2000);
+    expect((result.data as Record<string, unknown>).evil).toBeUndefined();
+    expect((result.data as Record<string, unknown>).isAdmin).toBeUndefined();
+  });
+
   it("creates a SKILL entry (admin can pre-create Skills, spec section F)", async () => {
     const result = await createCapability(db.prisma, {
       ...VALID_INPUT,
