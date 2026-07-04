@@ -13,6 +13,13 @@ node_modules/
 # testing / coverage
 /coverage
 
+# playwright (e2e test artifacts)
+/test-results/
+/playwright-report/
+/blob-report/
+*.db-wal
+*.db-shm
+
 # misc
 *.pem
 npm-debug.log*
