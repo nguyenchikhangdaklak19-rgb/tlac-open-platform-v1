@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -27,9 +28,22 @@ export default function RootLayout({
           <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-x-6 gap-y-3 px-4 py-3 sm:px-6">
             <Link
               href="/"
-              className="shrink-0 text-lg font-semibold text-primary-600"
+              className="flex min-w-0 shrink-0 items-center gap-2 text-lg font-semibold text-primary-600"
             >
-              TLAC Open Platform
+              <Image
+                src="/tlac-icon.png"
+                alt=""
+                width={36}
+                height={36}
+                className="h-8 w-8 shrink-0 rounded-lg sm:h-9 sm:w-9"
+                priority
+              />
+              <span className="flex min-w-0 flex-col justify-center leading-tight">
+                <span className="truncate">Trợ Lý Ăn Chơi</span>
+                <span className="text-[11px] font-normal leading-tight text-foreground/50">
+                  Open Platform
+                </span>
+              </span>
             </Link>
             <nav
               aria-label="Điều hướng chính"

@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import prisma from "@/lib/db";
 import { CapabilityList } from "@/components/catalog/capability-list";
+import { Hero } from "@/components/hero/hero";
 
 // Landing page (spec section A, IA: `/` — hero + 6 capability card + "Cách
 // kết nối 3 bước"). Reads the live catalog from the DB, so this can never be
@@ -42,35 +43,7 @@ export default async function Home() {
 
   return (
     <div className="flex flex-1 flex-col">
-      <section className="border-b border-primary-100 bg-primary-50/30">
-        <div className="mx-auto flex w-full max-w-6xl flex-col items-center gap-6 px-4 py-16 text-center sm:px-6 sm:py-20">
-          <span className="inline-flex items-center rounded-full bg-primary-100 px-4 py-1.5 text-sm font-medium text-primary-700">
-            BYOA — Bring Your Own Agent
-          </span>
-          <h1 className="max-w-3xl text-3xl font-semibold tracking-tight text-foreground sm:text-5xl">
-            Kết nối agent của bạn vào MCP server TLAC
-          </h1>
-          <p className="max-w-2xl text-base text-foreground/70 sm:text-lg">
-            TLAC Open Platform là nơi bạn tự tìm hiểu các năng lực MCP của Trợ
-            Lý Ăn Chơi (TLAC) và tự lấy cấu hình để cắm vào MCP client của
-            mình.
-          </p>
-          <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Link
-              href="/mcp"
-              className="inline-flex items-center justify-center rounded-full bg-primary-500 px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primary-600"
-            >
-              Khám phá năng lực MCP
-            </Link>
-            <Link
-              href="/docs"
-              className="inline-flex items-center justify-center rounded-full border border-primary-200 px-6 py-2.5 text-sm font-medium text-primary-600 transition-colors hover:bg-primary-50"
-            >
-              Xem hướng dẫn kết nối
-            </Link>
-          </div>
-        </div>
-      </section>
+      <Hero />
 
       <section className="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6">
         <div className="flex flex-wrap items-end justify-between gap-4">
